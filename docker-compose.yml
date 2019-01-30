@@ -1,0 +1,39 @@
+version: '2'
+services:
+  maildev:
+    container_name: prjweb-maildev
+    hostname: maildev
+    image: ledup/maildev
+    ports:
+      - "1080:80"
+    extends:
+        file: ~/.led/docker-base.yaml
+        service: localuser
+  mysql:
+    container_name: prjweb-mysql
+    hostname: mysql
+    image: gitlab.prestaconcept.net:7443/docker/mysql:5.7
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./.led/storage/mysql:/home/data
+      - ./.led/storage/dump:/dump
+    extends:
+        file: ~/.led/docker-base.yaml
+        service: localuser
+  apache:
+    container_name: prjweb-apache
+    hostname: apache
+    image: gitlab.prestaconcept.net:7443/docker/apache-php:7.3
+    ports:
+      - "80:80"
+      - "1081:8080"
+    volumes:
+      - .:/src
+    working_dir: /src
+    environment:
+        HTTPD_DOCROOT: public
+        LED_VHOSTS: app.localhost
+    extends:
+        file: ~/.led/docker-base.yaml
+        service: localuser
