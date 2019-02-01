@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Repository\CommentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -59,13 +60,20 @@ class Article
     private $imageFilename;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="article")
+     * @ORM\OneToMany(targetEntity="App\Entity\Comment", mappedBy="article",fetch="EXTRA_LAZY")
+     * @ORM\OrderBy({"createdAt" = "DESC"})
      */
     private $comments;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Tag", inversedBy="articles")
+     */
+    private $tags;
 
     public function __construct()
     {
         $this->comments = new ArrayCollection();
+        $this->tags = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -150,6 +158,7 @@ class Article
     {
         $this->heartCount ++ ;
     }
+
     /**
      * @return Collection|Comment[]
      */
@@ -157,6 +166,7 @@ class Article
     {
         return $this->comments;
     }
+
     public function addComment(Comment $comment): self
     {
         if (!$this->comments->contains($comment)) {
@@ -165,6 +175,7 @@ class Article
         }
         return $this;
     }
+
     public function removeComment(Comment $comment): self
     {
         if ($this->comments->contains($comment)) {
@@ -174,6 +185,37 @@ class Article
                 $comment->setArticle(null);
             }
         }
+        return $this;
+    }
+
+    public function getNondeletedComments():Collection
+    {
+        return $this->comments->matching(CommentRepository::createNonDeletedCriteria());
+    }
+
+    /**
+     * @return Collection|Tag[]
+     */
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
+    public function addTag(Tag $tag): self
+    {
+        if (!$this->tags->contains($tag)) {
+            $this->tags[] = $tag;
+        }
+
+        return $this;
+    }
+
+    public function removeTag(Tag $tag): self
+    {
+        if ($this->tags->contains($tag)) {
+            $this->tags->removeElement($tag);
+        }
+
         return $this;
     }
 }
