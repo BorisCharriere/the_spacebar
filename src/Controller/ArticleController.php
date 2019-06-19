@@ -4,7 +4,6 @@ namespace App\Controller;
 
 
 use App\Entity\Article;
-use App\Service\MarkdownHelper;
 use App\Service\SlackClient;
 use Doctrine\Common\Persistence\ObjectManager;
 use Psr\Log\LoggerInterface;
