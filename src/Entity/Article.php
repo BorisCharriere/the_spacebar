@@ -8,6 +8,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ArticleRepository")
@@ -31,6 +33,7 @@ class Article
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank()
      */
     private $title;
 
@@ -45,7 +48,7 @@ class Article
     private $publishedAt;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\ManyToOne(targetEntity="User")
      */
     private $author;
 
@@ -110,7 +113,7 @@ class Article
     {
         $this->publishedAt = $publishedAt;
     }
-    public function getTitle():string
+    public function getTitle():?string
     {
         return $this->title;
     }
@@ -120,12 +123,12 @@ class Article
         $this->title = $title;
     }
 
-    public function getAuthor(): ?string
+    public function getAuthor(): ?User
     {
         return $this->author;
     }
 
-    public function setAuthor(string $author): void
+    public function setAuthor(User $author): void
     {
         $this->author = $author;
     }
@@ -217,5 +220,22 @@ class Article
         }
 
         return $this;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->publishedAt !== null;
+    }
+
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+        if (stripos($this->getTitle(), 'the borg') !== false) {
+            $context->buildViolation('Um.. the Bork kinda makes us nervous')
+                ->atPath('title')
+                ->addViolation();
+        }
     }
 }

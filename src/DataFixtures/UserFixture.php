@@ -31,6 +31,7 @@ class UserFixture extends BaseFixture
                 $user,
                 'engage'
             ));
+            $user->agreeToTerms();
             return $user;
         });
         $this->createMany(3, 'admin_users', function($i) {
@@ -45,6 +46,7 @@ class UserFixture extends BaseFixture
                 $user,
                 '1234'
             ));
+            $user->agreeToTerms();
             return $user;
         });
 
